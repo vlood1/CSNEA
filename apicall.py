@@ -12,7 +12,7 @@ client = OpenAI(
     api_key= os.getenv("APIKEY")
 )
 
-user_input = "What is this document for?"
+user_input = "What punishment would I get for murdering someone?" # Example user input question
 
 
 # Uploading a file to OpenAI for use
@@ -34,23 +34,44 @@ results = client.vector_stores.search(
         max_num_results=10
     )
 
-print(results)
+# print(results)
 
-def extract_text(results):
-    return "\n".join(
-        chunk.text
-        for result in results.data
-        for chunk in result.content
-    )
+print(results.model_dump())
+
+# def extract_text(results):
+#     return "\n".join(
+#         chunk.text
+#         for result in results.data
+#         for chunk in result.content
+#     )
+
+# Method to extract and place together text content from results that have a score above 0.5
+def getobj(results):
+    objlist = []
+    for i in results.data:
+        if i.score > 0.5:
+            objlist.append("\n".join([chunk.text for chunk in i.content]))
+
+    return objlist
+
+context = "\n".join([text for text in getobj(results)])
+
 
 # MVP = Minimal Viable Product
 
-messages = [{"role": "system", "content": "You are a helpful legal assistant. Use the provided legal document context to answer the user's question."}] # Content of the system message - can be modified to change how the model will answer
-messages.append({"role": "user", "content": f"Context:\n{(extract_text(results))}\n\nQuestion: {user_input}"})
+messages = [{"role": "system", "content": "You are a helpful legal assistant. Use the provided legal document context to answer the user's question. Also, please cite the sections where you have retrieved relevant information along with answering the user's query."}] # Content of the system message - can be modified to change how the model will answer
+messages.append({"role": "user", "content": f"Context:\n{context}\n\nQuestion: {user_input}"})
 
+
+# Response creation
 response = client.chat.completions.create(
     model="gpt-4o-mini",
     messages=messages
     )
 
+# ADD WAY TO REMEMBER THINGS! (messages list) ^^^
+
 print(response.choices[0].message.content)
+
+
+
