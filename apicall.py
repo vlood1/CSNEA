@@ -12,7 +12,7 @@ client = OpenAI(
     api_key= os.getenv("APIKEY")
 )
 
-user_input = "What punishment would I get for murdering someone?" # Example user input question
+user_input = "Has anyone been sent to prison via this act?" # Example user input question
 
 
 # Uploading a file to OpenAI for use
@@ -45,6 +45,7 @@ print(results.model_dump())
 #         for chunk in result.content
 #     )
 
+
 # Method to extract and place together text content from results that have a score above 0.5
 def getobj(results):
     objlist = []
@@ -59,8 +60,29 @@ context = "\n".join([text for text in getobj(results)])
 
 # MVP = Minimal Viable Product
 
-messages = [{"role": "system", "content": "You are a helpful legal assistant. Use the provided legal document context to answer the user's question. Also, please cite the sections where you have retrieved relevant information along with answering the user's query."}] # Content of the system message - can be modified to change how the model will answer
+messages = [{"role": "system", "content": "You are a helpful legal assistant and your target audience is the general public that do not know the law, as well as barristers and also solicitors who are professionals in the law. Use the provided legal document in context to answer the user's question. If the act cannot be cited/utilised to answer the user's query, please state that this act is NOT RELEVANT by specifically stating that the act they provided does not apply to their question, but suggest a relevant act. When producing an answer for the user, please cite relevant/important sections. Additionally, if the Act doesn't appear to be relevant to their query and you cannot cite any sections, please state that the act is not relevant to their query, but do still answer their question about the law and suggest a relevant act the user can use instead."}] # Content of the system message - can be modified to change how the model will answer
 messages.append({"role": "user", "content": f"Context:\n{context}\n\nQuestion: {user_input}"})
+
+
+# Saving LLM's answer (memory) - assistant
+messages.append({"role": "assistant", "content": '''Under the Offences Against the Person Act 1861, if you are convicted of murder, the punishment is severe. Specifically:
+
+1. **Death Penalty**: Whosoever shall be convicted of Murder shall suffer Death as a Felon (Section 1).
+2. **Sentence for Murder**: Upon every conviction for murder, the Court shall pronounce a sentence of death (Section 2).
+
+It's important to note, though, that the death penalty in the UK has been abolished; thus, while historically, a conviction for murder would have carried the death penalty, current legal systems provide for life imprisonment or other serious penalties for such a crime.
+
+For the historical context as provided:
+- In the Act, it states that conviction leads to execution (Section 2), but this applies to the law as it was originally enacted and does not reflect current legal practices, which have evolved significantly since then.
+
+Therefore, if you were convicted of murder today, you would likely face life imprisonment or a lengthy prison sentence instead.'''})
+
+
+
+
+messages.append({"role": "user", "content": "How's your day?"})
+
+
 
 
 # Response creation
