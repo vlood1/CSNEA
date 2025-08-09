@@ -1,0 +1,2 @@
+Format to ask a query as the USER
+1) messages.append({"role": "user", "content": "How's your day?"})
