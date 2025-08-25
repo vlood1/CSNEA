@@ -35,4 +35,13 @@
 # #         for chunk in result.content
 # #     )
 
+# context = "\n".join([text for text in getobj(results)])
 
+
+
+
+# accessj.append({
+#         "vector_store_name": vsname,
+#         "vector_store_ID": vector_store_id,
+#         "file_IDs": {}
+#     })

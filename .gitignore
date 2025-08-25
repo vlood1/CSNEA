@@ -1,3 +1,5 @@
 venv
 .env
 test.py
+test.json
+hist.py
