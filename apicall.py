@@ -21,6 +21,7 @@ client = OpenAI(
 OPENAI_MODEL = "gpt-4o-mini"
 MAX_HISTORY_LENGTH = 6
 CACHE_FILE = "test.json" # JSON file to store file IDs and vector store IDs
+CHAT_HISTORY_FILE = "chathist.json" # JSON file to store chat history
 
 
 
@@ -73,7 +74,7 @@ def getobj(results):
 # Taking out an answer from the model based on whats been produced
 def synthesize_answer(chat_history, context_text, user_input):
     messages = [{"role": "system", "content": "You are a helpful legal assistant and your target audience is the general public that do not know the law, as well as barristers and also solicitors who are professionals in the law. Use the provided legal document in context to answer the user's question. If the act cannot be cited/utilised to answer the user's query, please state that this act is NOT RELEVANT by specifically stating that the act they provided does not apply to their question, but suggest a relevant act. When producing an answer for the user, please cite relevant/important sections. Additionally, if the Act doesn't appear to be relevant to their query and you cannot cite any sections, please state that the act is not relevant to their query, but do still answer their question about the law and suggest a relevant act the user can use instead."}] # Content of the system message - can be modified to change how the model will answer
-    messages.extend(chat_history[-MAX_HISTORY_LENGTH:])
+    messages.extend(chat_history[-MAX_HISTORY_LENGTH:]) # Adding the last few messages from chat history to provide context
     messages.append({"role": "user", "content": f"Context:\n{context_text}\n\nQuestion: {user_input}"})
 
     response = client.chat.completions.create(
@@ -165,8 +166,10 @@ filename = "OAPA.pdf" # Should be replaced with the path to the file you want to
 vector_store_id = pull_vs(vsname, filename) # Calling the function to add the file and create/access the vector store - getting back the vector store ID
 
 
-chat_history = []
-chat_history_id = 'some_random_chat_id'
+
+chat_history_id = 'theid' # This can be changed to allow for multiple chat histories to be stored and accessed
+chat_history_db = load_json(CHAT_HISTORY_FILE) # Loading the chat history JSON file
+chat_history = chat_history_db.get(chat_history_id, []) # Getting the chat history for the specific ID, or initialising an empty list if it doesn't exist (annoying bug fixed)
 
 
 while True:
@@ -184,6 +187,6 @@ while True:
         
         chat_history.append({"role": "user", "content": user_input}) # Storing user's question in chat_history (memory) for future use
         chat_history.append({"role": "assistant", "content": answer}) # Storing model's response in chat_history (memory) for future use
-
+        save_json({chat_history_id: chat_history}, CHAT_HISTORY_FILE) # Saving the chat history to a JSON file for future use
 
 
