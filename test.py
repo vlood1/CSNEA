@@ -45,3 +45,54 @@
 #         "vector_store_ID": vector_store_id,
 #         "file_IDs": {}
 #     })
+
+from pymongo import MongoClient # mongoDB
+import os
+from dotenv import load_dotenv
+
+
+
+
+
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Initialising MongoDB client
+db = MongoClient(os.getenv("MONGODBURI"))['legalbuddy'] # Database name
+chat_histcoll = db["chat_history"] # Collection name
+print(chat_histcoll)
+
+print("\n")
+
+record = chat_histcoll.find_one({"hi": 5})
+print(record)
+
+
+
+# find multiple
+records1 = chat_histcoll.find({"name": "Alice"})
+print(records1)
+
+# find all
+print("find all")
+records2 = chat_histcoll.find()
+list_records2 = list(records2)  
+
+print(list_records2)
+
+
+
+# insert one 
+print("\n")
+result = chat_histcoll.insert_one({"name": "Alice", "address": "123 Street"})
+print("Inserted ID:", result.inserted_id) 
+
+# insert many
+print("\n")
+docs = [
+    {"name": "Bob", "address": "456 Avenue"},
+    {"name": "Charlie", "address": "789 Boulevard"},
+]
+result = chat_histcoll.insert_many(docs)
+print("Inserted IDs:", result.inserted_ids) 

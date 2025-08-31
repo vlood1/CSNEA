@@ -1,2 +1,61 @@
 Format to ask a query as the USER
 1) messages.append({"role": "user", "content": "How's your day?"})
+from pymongo import MongoClient
+
+# Replace with your MongoDB connection string
+client = MongoClient("mongodb://localhost:27017/")
+
+# Access a database
+db = client["mydatabase"]
+
+# Access a collection (like a table in SQL)
+collection = db["customers"]
+
+# Insert a document
+doc_id = collection.insert_one({"name": "Alice", "address": "123 Street"}).inserted_id
+print("Inserted document ID:", doc_id)
+
+# Find a document
+record = collection.find_one({"name": "Alice"})
+print(record)
+ 
+['legalbuddy']
+
+chat_history = db[""] 
+
+Collection(Database(MongoClient(host=['ac-9hoe95o-shard-00-02.gjhnxw4.mongodb.net:27017', 'ac-9hoe95o-shard-00-01.gjhnxw4.mongodb.net:27017', 'ac-9hoe95o-shard-00-00.gjhnxw4.mongodb.net:27017'], document_class=dict, tz_aware=False, connect=True, authsource='admin', replicaset='atlas-skyj31-shard-0', tls=True), 'legalbuddy'), 'chat_history')
+
+record = collection.find_one({"name": "Alice"})
+records = collection.find({"name": "Alice"}) 
+records = collection.find()
+
+
+Create one
+result = collection.insert_one({"name": "Alice", "address": "123 Street"})
+print("Inserted ID:", result.inserted_id) 
+Create many
+docs = [
+    {"name": "Bob", "address": "456 Avenue"},
+    {"name": "Charlie", "address": "789 Boulevard"},
+]
+result = collection.insert_many(docs)
+print("Inserted IDs:", result.inserted_ids) 
+update one
+result = collection.update_one(
+    {"name": "Alice"},  # filter
+    {"$set": {"address": "999 New Road"}}  # update
+)
+print("Matched:", result.matched_count, "Modified:", result.modified_count)
+update many
+result = collection.update_many(
+    {"address": {"$regex": "^4"}},  # filter
+    {"$set": {"status": "verified"}}
+)
+print("Matched:", result.matched_count, "Modified:", result.modified_count)
+Delete one
+result = collection.delete_one({"name": "Charlie"})
+print("Deleted count:", result.deleted_count)
+
+Delete many
+result = collection.delete_many({"status": "verified"})
+print("Deleted count:", result.deleted_count)
