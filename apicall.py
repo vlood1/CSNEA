@@ -4,6 +4,10 @@ import openai
 from dotenv import load_dotenv
 import os
 import json
+from pymongo import MongoClient # mongoDB
+
+
+
 
 # MVP = Minimal Viable Product
 
@@ -12,14 +16,21 @@ import json
 # Load environment variables from .env file
 load_dotenv()
 
+# Initialising MongoDB client
+db = MongoClient(os.getenv("MONGODBURI"))['legalbuddy'] # Database name
+chat_histcoll = db["chat_history"] # Collection name
+id_archive = db["ID_archive"] # Collection name in MongoDB for storing file IDs and vector store IDs
+
+
+
 # Initialising OpenAI client with API key from environment variable (hidden for security)
 client = OpenAI(
-    api_key= os.getenv("APIKEY")
+    api_key = os.getenv("APIKEY")
 )
 
 # Constants / Configuration
 OPENAI_MODEL = "gpt-4o-mini"
-MAX_HISTORY_LENGTH = 6
+MAX_HISTORY_LENGTH = 6 # Optimising how many previous messages to include in context for the model - storing this data for improvement of the model later on
 CACHE_FILE = "test.json" # JSON file to store file IDs and vector store IDs
 CHAT_HISTORY_FILE = "chathist.json" # JSON file to store chat history
 
@@ -167,9 +178,16 @@ vector_store_id = pull_vs(vsname, filename) # Calling the function to add the fi
 
 
 
-chat_history_id = 'theid' # This can be changed to allow for multiple chat histories to be stored and accessed
-chat_history_db = load_json(CHAT_HISTORY_FILE) # Loading the chat history JSON file
-chat_history = chat_history_db.get(chat_history_id, []) # Getting the chat history for the specific ID, or initialising an empty list if it doesn't exist (annoying bug fixed)
+chat_history_id = 'testid2' # This can be changed to allow for multiple chat histories to be stored and accessed
+# chat_history_db = load_json(CHAT_HISTORY_FILE) # Loading the chat history JSON file
+
+chat_history_doc = chat_histcoll.find_one({"_id": chat_history_id})
+
+if not chat_history_doc: # if no document exists with the given chat_history_id, create a new one
+    chat_histcoll.insert_one({"_id": chat_history_id, "history": []}) # Inserting a new document if one doesn't exist already
+    chat_history_doc = {"history": []}
+
+chat_history = chat_history_doc["history"] # Getting the chat history from the JSON file - if it doesn't exist, start with an empty list
 
 
 while True:
@@ -187,6 +205,10 @@ while True:
         
         chat_history.append({"role": "user", "content": user_input}) # Storing user's question in chat_history (memory) for future use
         chat_history.append({"role": "assistant", "content": answer}) # Storing model's response in chat_history (memory) for future use
-        save_json({chat_history_id: chat_history}, CHAT_HISTORY_FILE) # Saving the chat history to a JSON file for future use
+        chat_histcoll.update_one(
+            {"_id": chat_history_id},  # filter
+            {"$set": {"history": chat_history}}  # update
+        )
+        
 
 
