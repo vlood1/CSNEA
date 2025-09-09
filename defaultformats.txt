@@ -40,12 +40,18 @@ docs = [
 ]
 result = collection.insert_many(docs)
 print("Inserted IDs:", result.inserted_ids) 
+
+
+
 update one
 result = collection.update_one(
     {"name": "Alice"},  # filter
     {"$set": {"address": "999 New Road"}}  # update
 )
 print("Matched:", result.matched_count, "Modified:", result.modified_count)
+
+
+
 update many
 result = collection.update_many(
     {"address": {"$regex": "^4"}},  # filter
