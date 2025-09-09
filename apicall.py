@@ -1,3 +1,5 @@
+''''''
+
 import os
 from openai import OpenAI
 import openai
@@ -178,7 +180,7 @@ vector_store_id = pull_vs(vsname, filename) # Calling the function to add the fi
 
 
 
-chat_history_id = 'testid2' # This can be changed to allow for multiple chat histories to be stored and accessed
+chat_history_id = 'testid3' # This can be changed to allow for multiple chat histories to be stored and accessed
 # chat_history_db = load_json(CHAT_HISTORY_FILE) # Loading the chat history JSON file
 
 chat_history_doc = chat_histcoll.find_one({"_id": chat_history_id})
